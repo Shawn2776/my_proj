@@ -9,10 +9,8 @@ async function register (req, res, next) {
       username, email, password
     });
 
-    res.status(201).json({
-      success: true,
-      user
-    });
+    sendToken(user, 201, res);
+
   } catch(err) {
     next(error);
   };
@@ -45,10 +43,7 @@ async function login(req, res, next) {
     }
 
     // if pw is correct, respond with jwt
-    res.status(201).json({
-      success: true,
-      token: 'fwefwfewef'
-    });
+    sendToken(user, 200, res);
 
   } catch (err) {
     res.status(500).json({ success: false, error: error.message });
@@ -69,3 +64,8 @@ module.exports = {
   forgotPassword,
   resetPassword
 }
+
+const sendToken = (user, statusCode, res) => {
+  const token = user.getSignedToken();
+  res.status(statusCode).json({ success: true, token });
+};
