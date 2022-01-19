@@ -11,10 +11,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide an email"],
     unique: true,
-    match: [
-      /^[a-zA-Z0-9.! #$%&'*+/=? ^_`{|}~-]+@[a-zA-Z0-9-]+(?:\. [a-zA-Z0-9-]+)*$/,
-      "Please provide a valid email address"
-    ]
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
   },
   password: {
     type: String,
@@ -35,6 +32,10 @@ UserSchema.pre("save", async function(next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
+
+UserSchema.methods.matchPasswords = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
 
 const User = mongoose.model("User", UserSchema);
 
