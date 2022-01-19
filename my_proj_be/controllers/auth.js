@@ -1,4 +1,5 @@
-const User = require('../models/Users')
+const User = require('../models/Users');
+const ErrorResponse = require('../utils/errorResponse');
 
 async function register (req, res, next) {
   const { username, email, password } = req.body;
@@ -13,10 +14,7 @@ async function register (req, res, next) {
       user
     });
   } catch(err) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   };
 
 };
@@ -26,7 +24,7 @@ async function login(req, res, next) {
 
   // rejected if email password is not given
   if (!email || !password) {
-    res.status(400).json({ success: false, error: "Please provide an email and password"});
+    return next(new ErrorResponse("Please provide an email and password", 400));
   }
 
   try {
@@ -35,7 +33,7 @@ async function login(req, res, next) {
 
     // rejected if email not found
     if (!user) {
-      res.status(404).json({ success: false, error: "Invalid credentials!"});
+      return next(new ErrorResponse("Invalid credentials!", 401));
     }
 
     // comparing given pw to pw in db with given email
@@ -43,7 +41,7 @@ async function login(req, res, next) {
 
     // rejecting login if given pw doesnot match db pw
     if (!isMatch) {
-      res.status(404).json({ success: false, error: "Invalid credentials!"});
+      return next(new ErrorResponse("Invalid credentials!", 401));
     }
 
     // if pw is correct, respond with jwt
